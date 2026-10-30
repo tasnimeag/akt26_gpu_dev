@@ -45,11 +45,7 @@ __global__ void batch_gemm_kernel(
     const float* B,
     float* C)
 {
-    __global__ void batch_gemm_kernel(int n, int batch_size,
-                                  const float* A,
-                                  const float* B,
-                                  float* C)
-{
+
     int row = blockIdx.x * blockDim.x + threadIdx.x;
     int col = blockIdx.y * blockDim.y + threadIdx.y;
     int b = blockIdx.z;
@@ -70,7 +66,7 @@ __global__ void batch_gemm_kernel(
         C[base + (size_t)col * n + row] = sum;
     }
 }
-}
+
 
 // ============================================================
 // CPU reference implementation
