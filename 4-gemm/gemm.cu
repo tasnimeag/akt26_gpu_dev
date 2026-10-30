@@ -367,11 +367,14 @@ int main(int argc, char** argv)
     // --------------------------------------------------------
     // Cleanup
     // --------------------------------------------------------
-    // TODO: Destroy any CUDA events you created
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
 
-    // TODO: Destroy any cuBLAS handles you created
+    cublasDestroy(handle);
 
-    // TODO: free any GPU memory you allocated
+   cudaFree(d_A);
+   cudaFree(d_B);
+   cudaFree(d_C);
 
     return 0;
 }
