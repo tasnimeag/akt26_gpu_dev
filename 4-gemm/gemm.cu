@@ -250,38 +250,73 @@ int main(int argc, char** argv)
     cudaEventSynchronize(stop);
 
     float custom_ms = 0.0f;
-    // TODO: calculate the time of your kernel using 'cudaEventElapsedTime'
+    cudaEventElapsedTime(&custom_ms, start, stop);
 
     const double custom_us = custom_ms * 1000.0 / repeats;
 
 
-    // TODO: copy the output matrices to CPU in 'h_custom'
+    cudaMemcpy(
+    h_custom.data(),
+    d_C,
+    bytes,
+    cudaMemcpyDeviceToHost
+  );
 
     // --------------------------------------------------------
     // cuBLAS strided batched GEMM
     // --------------------------------------------------------
 
-    // TODO: create a cuBLAS handle
+    cublasHandle_t handle;
+    cublasCreate(&handle);
+    const float alpha = 1.0f;
+    const float beta  = 0.0f;
 
-    // TODO: warmup run for 'cublasSgemmStridedBatched'
-    // TODO: note that the leading dimension for all matrices is 'n'
+    cublasSgemmStridedBatched(
+        handle,
+        CUBLAS_OP_N,
+        CUBLAS_OP_N,
+        n, n, n,
+        &alpha,
+        d_A, n, (long long)matrix_size,
+        d_B, n, (long long)matrix_size,
+        &beta,
+        d_C, n, (long long)matrix_size,
+        batch_size
+    );
 
     cudaDeviceSynchronize();
 
-    // TODO: start timing using CUDA events
+    cudaEventRecord(start);
     for (int r = 0; r < repeats; ++r) {
 
-        // TODO: call 'cublasSgemmStridedBatched'
+       cublasSgemmStridedBatched(
+            handle,
+            CUBLAS_OP_N,
+            CUBLAS_OP_N,
+            n, n, n,
+            &alpha,
+            d_A, n, (long long)matrix_size,
+            d_B, n, (long long)matrix_size,
+            &beta,
+            d_C, n, (long long)matrix_size,
+            batch_size
+     );
     }
 
-    // TODO: end timing using CUDA events
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
 
     float cublas_ms = 0.0f;
-    // TODO: calculate the time of 'cublasSgemmStridedBatched' using 'cudaEventElapsedTime'
+   cudaEventElapsedTime(&cublas_ms, start, stop);
 
     const double cublas_us = cublas_ms * 1000.0 / repeats;
 
-    // TODO: copy the output matrices to CPU in 'h_cublas'
+    cudaMemcpy(
+    h_cublas.data(),
+    d_C,
+    bytes,
+    cudaMemcpyDeviceToHost
+    );
 
     // --------------------------------------------------------
     // Performance and forward error
