@@ -21,7 +21,32 @@ __global__ void batch_gemm_kernel(int n, int batch_size,
                                     float* C)
 {
     // TODO: write your own kernel here
+    // Identification de la position du thread
+    int row = blockIdx.x * blockDim.x + threadIdx.x;
+    int col = blockIdx.y * blockDim.y + threadIdx.y;
+    int b   = blockIdx.z;
+
+    // Vérification des limites
+    if (row < n && col < n && b < batch_size)
+    {
+        size_t matrix_size = (size_t)n * n;
+        size_t base = (size_t)b * matrix_size;
+
+        float sum = 0.0f;
+
+        // Calcul du produit scalaire
+        for (int k = 0; k < n; ++k)
+        {
+            sum += A[base + (size_t)k * n + row]
+                 * B[base + (size_t)col * n + k];
+        }
+
+        // Stockage du résultat
+        C[base + (size_t)col * n + row] = sum;
+    }
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // CPU reference implementation
@@ -148,6 +173,17 @@ int main(int argc, char** argv)
     // Allocate GPU memory
     // --------------------------------------------------------
     // TODO: write your allocations here
+
+    // Pointeurs vers la mémoire GPU
+    float *d_A = nullptr;
+    float *d_B = nullptr;
+    float *d_C = nullptr;
+
+    // Allocation de la mémoire GPU
+    cudaMalloc((void**)&d_A, bytes);
+    cudaMalloc((void**)&d_B, bytes);
+    cudaMalloc((void**)&d_C, bytes);
+
 
     // --------------------------------------------------------
     // Copy A and B to GPU
