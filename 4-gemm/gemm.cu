@@ -227,7 +227,7 @@ int main(int argc, char** argv)
 
     const size_t matrix_size = (size_t)n * n;
     const size_t total = matrix_size * batch_size;
-    const size_t bytes = total * sizeof(float);
+    //const size_t bytes = total * sizeof(float);
 
     // --------------------------------------------------------
     // 1. Allocation des tableaux CPU
