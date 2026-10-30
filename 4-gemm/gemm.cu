@@ -212,28 +212,42 @@ int main(int argc, char** argv)
     // --------------------------------------------------------
     // CUDA events
     // --------------------------------------------------------
-    // TODO: create CUDA events for timing
+    // Création des événements CUDA
+      cudaEvent_t start, stop;
+
+      cudaEventCreate(&start);
+      cudaEventCreate(&stop);
 
     // --------------------------------------------------------
     // Custom kernel configuration
     // --------------------------------------------------------
-    // TODO: configure your kernel here
+    // Configuration du kernel
+    dim3 block(16, 16);
+    dim3 grid((n + 15) / 16,
+          (n + 15) / 16,
+          batch_size);
 
 
     // --------------------------------------------------------
     // Warmup run
     // --------------------------------------------------------
-    // TODO: run your kernel once (warmup - not timed)
+     // Exécution initiale sans mesure du temps
+    batch_gemm_kernel<<<grid, block>>>(
+            n, batch_size, d_A, d_B, d_C
+    );
 
     cudaDeviceSynchronize();
 
-    // TODO: start your timing here using CUDA events
+    cudaEventRecord(start);
 
     for (int r = 0; r < repeats; ++r) {
-        // TODO: run your kernel here
+        batch_gemm_kernel<<<grid, block>>>(
+              n, batch_size, d_A, d_B, d_C
+        );
     }
 
-    // TODO: end your timing here using CUDA events
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
 
     float custom_ms = 0.0f;
     // TODO: calculate the time of your kernel using 'cudaEventElapsedTime'
