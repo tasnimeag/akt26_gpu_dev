@@ -188,7 +188,8 @@ int main(int argc, char** argv)
     // --------------------------------------------------------
     // Copy A and B to GPU
     // --------------------------------------------------------
-    // TODO: write your mem-copies here
+        cudaMemcpy(d_A, h_A.data(), bytes, cudaMemcpyHostToDevice);
+        cudaMemcpy(d_B, h_B.data(), bytes, cudaMemcpyHostToDevice);
 
     // --------------------------------------------------------
     // GPU information
