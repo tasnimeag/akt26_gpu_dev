@@ -235,7 +235,15 @@ int main(int argc, char** argv)
     batch_gemm_kernel<<<grid, block>>>(
             n, batch_size, d_A, d_B, d_C
     );
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        printf("Kernel launch error: %s\n", cudaGetErrorString(err));
+    }
 
+err = cudaDeviceSynchronize();
+if (err != cudaSuccess) {
+    printf("Kernel execution error: %s\n", cudaGetErrorString(err));
+}
     cudaDeviceSynchronize();
 
     cudaEventRecord(start);
@@ -261,6 +269,8 @@ int main(int argc, char** argv)
     bytes,
     cudaMemcpyDeviceToHost
   );
+  printf("Custom result[0] = %f\n", h_custom[0]);
+  printf("CPU reference[0] = %f\n", h_ref[0]);
 
     // --------------------------------------------------------
     // cuBLAS strided batched GEMM
@@ -283,7 +293,9 @@ int main(int argc, char** argv)
         d_C, n, (long long)matrix_size,
         batch_size
     );
-
+    if (status != CUBLAS_STATUS_SUCCESS) {
+    printf("cuBLAS error: %d\n", (int)status);
+    }
     cudaDeviceSynchronize();
 
     cudaEventRecord(start);
@@ -308,7 +320,11 @@ int main(int argc, char** argv)
 
     float cublas_ms = 0.0f;
    cudaEventElapsedTime(&cublas_ms, start, stop);
+    if (time_err != cudaSuccess) {
+        printf("Timing error: %s\n", cudaGetErrorString(time_err));
+    }
 
+printf("Custom total time (ms): %.6f\n", custom_ms);
     const double cublas_us = cublas_ms * 1000.0 / repeats;
 
     cudaMemcpy(
